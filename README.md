@@ -32,7 +32,7 @@ username: testuser@mail.ru
 ```
   
 Пример запроса и ответа неуспешной проверки токена abracadabra и scope xxx  
-```
+```bash
 $ cube cube.testserver.mail.ru 4995 abracadabra xxx
 error: CUBE_OAUTH2_ERR_BAD_SCOPE
 message: bad scope
