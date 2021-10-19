@@ -1,6 +1,6 @@
 package models
 
 type Protocol interface {
-	Decode()
-	Encode()
+	Decode() ([]byte, error)
+	Encode() error
 }
