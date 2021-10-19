@@ -4,7 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"mail-test-task/internal/app/client"
+	"mail-test-task/internal/app/delivery/client"
 	"os"
 )
 
@@ -18,7 +18,7 @@ func main() {
 	}
 	host, port, token, scope := args[0], args[1], args[2], args[3]
 	retCode := 0
-	err := client.Run(host, port, token, scope)
+	err := client.Request(host, port, token, scope)
 	if err != nil {
 		retCode = 1
 	}

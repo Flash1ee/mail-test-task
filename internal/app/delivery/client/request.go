@@ -2,7 +2,7 @@ package client
 
 import "fmt"
 
-func Run(host string, port string, token string, scope string) error {
+func Request(host string, port string, token string, scope string) error {
 	client, err := NewClient(host, port)
 	if err != nil {
 		return err
