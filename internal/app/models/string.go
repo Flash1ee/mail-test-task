@@ -3,6 +3,7 @@ package models
 import (
 	"bytes"
 	"encoding/binary"
+	"strings"
 )
 
 // не очень хорошо, но использовать пакет unsafe не советуют из-за непереносимости..
@@ -40,6 +41,15 @@ func (s *String) Decode(binData []byte) error {
 
 	return nil
 }
-func (s *String) GetBytesLength() int {
+func (s String) ToString() (string, error) {
+	decodeString := new(strings.Builder)
+	for _, char := range s.Str {
+		if err := decodeString.WriteByte(byte(char)); err != nil {
+			return "", err
+		}
+	}
+	return decodeString.String(), nil
+}
+func (s String) GetBytesLength() int {
 	return len(s.Str) + INT32_SIZE
 }
