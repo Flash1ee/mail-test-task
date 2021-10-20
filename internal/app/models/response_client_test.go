@@ -11,7 +11,7 @@ func cmpProtoResponseClientOk(r Response, r2 ResponseClientOk) bool {
 		return false
 	}
 	return unpackR.ClientType == r2.ClientType && unpackR.ExpiresIn == r2.ExpiresIn && unpackR.UserId == r2.UserId &&
-		cmpProtoString(convertToProtoString(r2.ClientId), unpackR.ClientId) && cmpProtoString(convertToProtoString(r2.UserName), unpackR.UserName)
+		cmpProtoString(ConvertToProtoString(r2.ClientId), unpackR.ClientId) && cmpProtoString(ConvertToProtoString(r2.UserName), unpackR.UserName)
 }
 func cmpProtoResponseClientError(r Response, r2 ResponseClientError) bool {
 	if r.ReturnCode != r2.ReturnCode {
@@ -21,7 +21,7 @@ func cmpProtoResponseClientError(r Response, r2 ResponseClientError) bool {
 	if !ok {
 		return false
 	}
-	return cmpProtoString(convertToProtoString(r2.ErrorString), unpackR.ErrorString)
+	return cmpProtoString(ConvertToProtoString(r2.ErrorString), unpackR.ErrorString)
 }
 
 func TestConvertToClientResponse_Invalid_ErrCode(t *testing.T) {

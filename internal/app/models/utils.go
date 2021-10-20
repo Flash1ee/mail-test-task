@@ -17,3 +17,14 @@ func GetIprotoString(str string) String {
 
 	return String{Str: binStr, Len: length}
 }
+func ConvertToProtoString(str string) String {
+	length := len(str)
+	b := make([]int8, 0, length)
+	for _, val := range str {
+		b = append(b, int8(val))
+	}
+	return String{
+		Str: b,
+		Len: int32(length),
+	}
+}

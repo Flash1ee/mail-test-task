@@ -2,18 +2,6 @@ package models
 
 import "testing"
 
-func convertToProtoString(str string) String {
-	length := len(str)
-	b := make([]int8, 0, length)
-	for _, val := range str {
-		b = append(b, int8(val))
-	}
-	return String{
-		Str: b,
-		Len: int32(length),
-	}
-}
-
 func cmpProtoString(str String, str2 String) bool {
 	if str.Len != str2.Len || len(str.Str) != len(str.Str) {
 		return false
@@ -30,7 +18,7 @@ func TestString_GetBytesLength_OrdinaryString(t *testing.T) {
 	testString := "mailisvk"
 	expectedLen := len(testString) + INT32_SIZE
 
-	protoLen := convertToProtoString(testString).GetBytesLength()
+	protoLen := ConvertToProtoString(testString).GetBytesLength()
 	if protoLen != expectedLen {
 		t.Fatal("incorrect len")
 	}
@@ -39,14 +27,14 @@ func TestString_GetBytesLength_EmptyString(t *testing.T) {
 	testString := ""
 	expectedLen := len(testString) + INT32_SIZE
 
-	protoLen := convertToProtoString(testString).GetBytesLength()
+	protoLen := ConvertToProtoString(testString).GetBytesLength()
 	if protoLen != expectedLen {
 		t.Fatal("incorrect len")
 	}
 }
 func TestString_Encode_Decode(t *testing.T) {
 	testString := "mailisvk"
-	expectedProtoStr := convertToProtoString(testString)
+	expectedProtoStr := ConvertToProtoString(testString)
 
 	encoded, err := expectedProtoStr.Encode()
 	if err != nil {
@@ -62,7 +50,7 @@ func TestString_Encode_Decode(t *testing.T) {
 }
 func TestString_Encode_Decode_Empty(t *testing.T) {
 	testString := ""
-	expectedProtoStr := convertToProtoString(testString)
+	expectedProtoStr := ConvertToProtoString(testString)
 
 	encoded, err := expectedProtoStr.Encode()
 	if err != nil {
@@ -78,7 +66,7 @@ func TestString_Encode_Decode_Empty(t *testing.T) {
 }
 func TestString_ToString(t *testing.T) {
 	testString := "mailisvk"
-	protoString := convertToProtoString(testString)
+	protoString := ConvertToProtoString(testString)
 	res, err := protoString.ToString()
 	if err != nil || res != testString {
 		t.Fatalf("invalid convert from protoStr to str\nexpected: %v received: %v",
@@ -87,7 +75,7 @@ func TestString_ToString(t *testing.T) {
 }
 func TestString_ToString_Empty(t *testing.T) {
 	testString := ""
-	protoString := convertToProtoString(testString)
+	protoString := ConvertToProtoString(testString)
 	res, err := protoString.ToString()
 	if err != nil || res != testString {
 		t.Fatalf("invalid convert from protoStr to str\nexpected: %v received: %v",

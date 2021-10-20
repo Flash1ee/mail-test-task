@@ -46,7 +46,7 @@ func TestSliceSum_FourSlice(t *testing.T) {
 }
 func TestGetIprotoString(t *testing.T) {
 	testString := "string"
-	exp := convertToProtoString(testString)
+	exp := ConvertToProtoString(testString)
 	res := GetIprotoString(testString)
 	if !cmpProtoString(exp, res) {
 		t.Fatalf("receive string %v not equal expected %v", res, exp)
@@ -54,7 +54,7 @@ func TestGetIprotoString(t *testing.T) {
 }
 func TestGetIprotoStringEmpty(t *testing.T) {
 	testString := ""
-	exp := convertToProtoString(testString)
+	exp := ConvertToProtoString(testString)
 	res := GetIprotoString(testString)
 	if !cmpProtoString(exp, res) {
 		t.Fatalf("receive string %v not equal expected %v", res, exp)

@@ -11,32 +11,32 @@ func packingHeader(body []byte) ([]byte, error) {
 	bodyLength := int32(len(body))
 	var reqID int32 = 1
 
-	header, err := (&models.Header{
+	header := models.Header{
 		SvcId:     svc_id,
 		BodyLen:   bodyLength,
 		RequestId: reqID,
-	}).Encode()
+	}
+	encoded, err := header.Encode()
 
 	if err != nil {
 		return nil, err
 	}
-	return header, nil
+	return encoded, nil
 }
 
 func packingBody(token, scope string) ([]byte, error) {
 	protoToken := models.GetIprotoString(token)
 	protoScope := models.GetIprotoString(scope)
 
-	body, err := (&models.Request{
+	body := models.Request{
 		SvcMsg: svc_msg,
 		Token:  protoToken,
-		Scope:  protoScope,
-	}).Encode()
-
+		Scope:  protoScope}
+	encoded, err := body.Encode()
 	if err != nil {
 		return nil, err
 	}
-	return body, nil
+	return encoded, nil
 }
 
 func getPackage(token string, scope string) ([]byte, error) {
@@ -48,5 +48,6 @@ func getPackage(token string, scope string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return models.SliceSum(header, body), nil
+	headerLen := models.Header{}.HeaderSize()
+	return models.SliceSum(header, body[headerLen:]), nil
 }
