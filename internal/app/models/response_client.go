@@ -16,6 +16,12 @@ type ResponseClientError struct {
 
 func ConvertToClientResponse(body Response) (interface{}, error) {
 	var err error
+	if body.ReturnCode < 0 {
+		return nil, InvalidErrCode
+	}
+	if body.Body == nil {
+		return nil, EmptyBodyErr
+	}
 	if body.ReturnCode != 0 {
 		ret := ResponseClientError{ReturnCode: body.ReturnCode}
 		if ret.ErrorString, err = body.Body.(*ResponseError).ErrorString.ToString(); err != nil {
