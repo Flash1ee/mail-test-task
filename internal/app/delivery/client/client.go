@@ -10,12 +10,10 @@ type Client struct {
 	conn connection.Conn
 }
 
-func NewClient(host string, port string) (IClient, error) {
-	conn, err := connection.NewTcpConnection(host, port)
-	if err != nil {
-		return nil, err
+func NewClient(conn connection.Conn) *Client {
+	return &Client{
+		conn: conn,
 	}
-	return &Client{conn: conn}, nil
 }
 func (c *Client) Send(token string, scope string) (interface{}, error) {
 	conn, err := c.conn.Dial()
@@ -23,7 +21,12 @@ func (c *Client) Send(token string, scope string) (interface{}, error) {
 		return nil, err
 	}
 
-	defer conn.Close()
+	defer func(conn connection.Conn) {
+		err := conn.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(conn)
 
 	if err := sendPackage(conn, token, scope); err != nil {
 		return nil, err
@@ -61,7 +64,7 @@ func getRespond(conn connection.Conn) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return resp, nil
+	return resp, err
 }
 func (c *Client) PrintResponse(resp interface{}) {
 	switch v := resp.(type) {
@@ -83,10 +86,10 @@ func printOk(resp models.ResponseClientOk) {
 
 func printErr(resp models.ResponseClientError) {
 	var errorString string
-	if resp.ReturnCode < 0 || int(resp.ReturnCode) > len(errors) {
+	if resp.ReturnCode < 0 || int(resp.ReturnCode) > len(errorCodes) {
 		errorString = "unknown error"
 	} else {
-		errorString = errors[resp.ReturnCode]
+		errorString = errorCodes[resp.ReturnCode]
 	}
 	fmt.Printf("error: %s\n", errorString)
 	fmt.Printf("message: %s\n", resp.ErrorString)

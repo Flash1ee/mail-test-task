@@ -1,6 +1,6 @@
 package client
 
-var errors = []string{
+var errorCodes = []string{
 	"CUBE_OAUTH2_ERR_OK",
 	"CUBE_OAUTH2_ERR_TOKEN_NOT_FOUND",
 	"CUBE_OAUTH2_ERR_DB_ERROR",
