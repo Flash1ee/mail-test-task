@@ -14,7 +14,7 @@ func convertToProtoString(str string) String {
 	}
 }
 
-func cmp(str String, str2 String) bool {
+func cmpProtoString(str String, str2 String) bool {
 	if str.Len != str2.Len || len(str.Str) != len(str.Str) {
 		return false
 	}
@@ -56,7 +56,7 @@ func TestString_Encode_Decode(t *testing.T) {
 	if err := decodedProtoStr.Decode(encoded); err != nil {
 		t.Fatal("invalid decoded protoStr")
 	}
-	if !cmp(expectedProtoStr, decodedProtoStr) {
+	if !cmpProtoString(expectedProtoStr, decodedProtoStr) {
 		t.Fatalf("invalid compare: %v not equal %v", expectedProtoStr, decodedProtoStr)
 	}
 }
@@ -72,7 +72,7 @@ func TestString_Encode_Decode_Empty(t *testing.T) {
 	if err := decodedProtoStr.Decode(encoded); err != nil {
 		t.Fatal("invalid decoded protoStr")
 	}
-	if !cmp(expectedProtoStr, decodedProtoStr) {
+	if !cmpProtoString(expectedProtoStr, decodedProtoStr) {
 		t.Fatalf("invalid compare: %v not equal %v", expectedProtoStr, decodedProtoStr)
 	}
 }
