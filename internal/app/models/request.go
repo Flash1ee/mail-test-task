@@ -37,10 +37,11 @@ func (r *Request) Encode() ([]byte, error) {
 }
 func (r *Request) Decode(binData []byte) error {
 	data := bytes.NewBuffer(binData)
-	if err := binary.Read(data, binary.LittleEndian, r.Header); err != nil {
+	if err := r.Header.Decode(data.Bytes()); err != nil {
 		return err
 	}
-	if err := binary.Read(data, binary.LittleEndian, r.SvcMsg); err != nil {
+	data.Next(r.Header.HeaderSize())
+	if err := binary.Read(data, binary.LittleEndian, &r.SvcMsg); err != nil {
 		return err
 	}
 	if err := r.Token.Decode(data.Bytes()); err != nil {

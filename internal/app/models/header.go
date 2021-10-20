@@ -11,6 +11,10 @@ type Header struct {
 	RequestId int32
 }
 
+func (h Header) HeaderSize() int {
+	return INT32_SIZE * 3
+}
+
 func (h *Header) Encode() ([]byte, error) {
 	data := new(bytes.Buffer)
 	if err := binary.Write(data, binary.LittleEndian, h); err != nil {

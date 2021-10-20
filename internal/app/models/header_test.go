@@ -8,11 +8,7 @@ func cmpProtoHeader(h Header, h2 Header) bool {
 	return h.SvcId == h2.SvcId && h.BodyLen == h2.BodyLen && h.RequestId == h2.RequestId
 }
 func TestHeader_Encode_Decode(t *testing.T) {
-	expectedHeader := Header{
-		SvcId:     1,
-		BodyLen:   2,
-		RequestId: 3,
-	}
+	expectedHeader := TestHeader(t)
 	testHeader := expectedHeader
 	binHeader, err := testHeader.Encode()
 	if err != nil {
