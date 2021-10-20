@@ -7,7 +7,7 @@ import (
 
 type ResponseBody interface {
 	Encode() ([]byte, error)
-	Decode([]byte) error
+	Decode(binData []byte) error
 }
 
 type Response struct {
@@ -60,17 +60,17 @@ func (r *ResponseOk) Decode(binData []byte) error {
 		return err
 	}
 	data.Next(r.ClientId.GetBytesLength())
-	if err := binary.Read(data, binary.LittleEndian, r.ClientType); err != nil {
+	if err := binary.Read(data, binary.LittleEndian, &r.ClientType); err != nil {
 		return err
 	}
 	if err := r.UserName.Decode(data.Bytes()); err != nil {
 		return err
 	}
 	data.Next(r.UserName.GetBytesLength())
-	if err := binary.Read(data, binary.LittleEndian, r.ExpiresIn); err != nil {
+	if err := binary.Read(data, binary.LittleEndian, &r.ExpiresIn); err != nil {
 		return err
 	}
-	if err := binary.Read(data, binary.LittleEndian, r.UserId); err != nil {
+	if err := binary.Read(data, binary.LittleEndian, &r.UserId); err != nil {
 		return err
 	}
 	return nil
@@ -95,6 +95,9 @@ func (r *Response) Encode() ([]byte, error) {
 	if err := binary.Write(dataBin, binary.LittleEndian, r.ReturnCode); err != nil {
 		return nil, err
 	}
+	if r.Body == nil {
+		return nil, EmptyBodyErr
+	}
 	data, err := r.Body.Encode()
 	if err != nil {
 		return nil, err
@@ -104,7 +107,7 @@ func (r *Response) Encode() ([]byte, error) {
 func (r *Response) Decode(binData []byte) error {
 	data := bytes.NewBuffer(binData)
 
-	if err := binary.Read(data, binary.LittleEndian, r.ReturnCode); err != nil {
+	if err := binary.Read(data, binary.LittleEndian, &r.ReturnCode); err != nil {
 		return err
 	}
 	if r.ReturnCode != 0 {
