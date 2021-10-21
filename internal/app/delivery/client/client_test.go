@@ -1,240 +1,54 @@
 package client
 
 import (
-	"errors"
+	"bytes"
+	"fmt"
 	"mail-test-task/internal/app/mocks"
 	"mail-test-task/internal/app/models"
 	"testing"
 )
 
-func cmpClientResponseOk(first models.ResponseClientOk, second models.ResponseClientOk) bool {
-	return first.ReturnCode == second.ReturnCode && first.UserId == second.UserId && first.ExpiresIn == second.ExpiresIn &&
-		first.UserName == second.UserName && first.ClientType == second.ClientType &&
-		first.ClientId == second.ClientId
-}
-func TestClient_InvalidWrite(t *testing.T) {
-	connection := &mocks.Conn{
-		MockWrite: mocks.MockWrite(true),
-		MockClose: mocks.MockClose(nil),
-	}
-	dial := mocks.MockDial(connection, nil)
-	connection.MockDial = dial
-	client := NewClient(connection)
-
-	if err := client.Send("vk", "mail.ru"); err == nil {
-		t.Fatalf("error %v happened", err)
-	}
-}
-func TestClient_InvalidDial(t *testing.T) {
-	connection := &mocks.Conn{
-		MockWrite: mocks.MockWrite(false),
-		MockClose: mocks.MockClose(nil),
-	}
-
-	dial := mocks.MockDial(connection, errors.New("error dial"))
-	connection.MockDial = dial
-	client := NewClient(connection)
-
-	if err := client.Send("vk", "mail.ru"); err == nil {
-		t.Fatalf("error %v happened", err)
-	}
-}
-func TestClient_InvalidRead(t *testing.T) {
-	readFunc := func(data []byte) ([]byte, error) {
-		return nil, errors.New("error read")
-	}
-	connection := &mocks.Conn{
-		MockWrite: mocks.MockWrite(false),
-		MockClose: mocks.MockClose(nil),
-		MockRead:  readFunc,
-	}
-
-	dial := mocks.MockDial(connection, nil)
-	connection.MockDial = dial
-	client := NewClient(connection)
-
-	if err := client.Send("vk", "mail.ru"); err == nil {
-		t.Fatalf("error %v happened", err)
-	}
-}
-func TestClient_InvalidClose(t *testing.T) {
-	readFunc := func(data []byte) ([]byte, error) {
-		res := models.TestResponseWithCodeOk(t)
-		return res.Encode()
-
-	}
-	connection := &mocks.Conn{
-		MockWrite: mocks.MockWrite(false),
-		MockClose: mocks.MockClose(errors.New("happened error in connection close")),
-		MockRead:  readFunc,
-	}
-
-	dial := mocks.MockDial(connection, nil)
-	connection.MockDial = dial
-	client := NewClient(connection)
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	if err := client.Send("vk", "mail.ru"); err == nil {
-		t.Fatalf("error %v happened", err)
-	}
-}
-func TestClient_ResponseOk(t *testing.T) {
-	ret := models.ResponseClientOk{
-		ReturnCode: 0,
-		ClientId:   "this is id",
-		ClientType: 100,
-		UserName:   "vk@mail.ru",
-		ExpiresIn:  10 * 3600,
-		UserId:     1000,
-	}
-
-	readFunc := func(data []byte) ([]byte, error) {
-		req := models.Response{
-			ReturnCode: ret.ReturnCode,
-			Body: &models.ResponseOk{
-				ClientId:   models.ConvertToProtoString("this is id"),
-				ClientType: 100,
-				UserName:   models.ConvertToProtoString("vk@mail.ru"),
-				ExpiresIn:  10 * 3600,
-				UserId:     1000,
-			},
-		}
-		return req.Encode()
-	}
-	connection := &mocks.Conn{
-		MockWrite: mocks.MockWrite(false),
-		MockClose: mocks.MockClose(nil),
-		MockRead:  readFunc,
-	}
-	connection.MockDial = mocks.MockDial(connection, nil)
-	client := NewClient(connection)
-	err := client.Send("token", "scope")
-	if err != nil {
-		t.Fatalf("error %v happened", err)
-	}
-	data, ok := res.(models.ResponseClientOk)
-	if !ok {
-		t.Fatalf("invalid response data, expected ResponseClientOk")
-	}
-	if !cmpClientResponseOk(data, ret) {
-		t.Fatalf("invalid return code")
-	}
-}
-func TestClient_Response_ReturnCode_Error(t *testing.T) {
-	ret := models.ResponseClientOk{
-		ReturnCode: -1,
-	}
-
-	readFunc := func(data []byte) ([]byte, error) {
-		req := models.Response{
-			ReturnCode: ret.ReturnCode,
-			Body:       &models.ResponseOk{},
-		}
-		return req.Encode()
-	}
-	connection := &mocks.Conn{
-		MockWrite: mocks.MockWrite(false),
-		MockClose: mocks.MockClose(nil),
-		MockRead:  readFunc,
-	}
-	connection.MockDial = mocks.MockDial(connection, nil)
-	client := NewClient(connection)
-	err := client.Send("token", "scope")
-	if err == nil || res != nil {
-		t.Fatalf("error %v happened", err)
-	}
-	if err != models.InvalidErrCode {
-		t.Fatalf("error %v expected %v", err, models.InvalidErrCode)
-	}
-}
-
-func TestClient_Response_EmptyBody(t *testing.T) {
-	ret := models.ResponseClientOk{
-		ReturnCode: 0,
-	}
-
-	readFunc := func(data []byte) ([]byte, error) {
-		req := models.Response{
-			ReturnCode: ret.ReturnCode,
-			Body:       nil,
-		}
-		return req.Encode()
-	}
-	connection := &mocks.Conn{
-		MockWrite: mocks.MockWrite(false),
-		MockClose: mocks.MockClose(nil),
-		MockRead:  readFunc,
-	}
-	connection.MockDial = mocks.MockDial(connection, nil)
-	client := NewClient(connection)
-	err := client.Send("token", "scope")
-	if err == nil || res != nil {
-		t.Fatalf("error %v happened", err)
-	}
-	if err != models.EmptyBodyErr {
-		t.Fatalf("error %v expected %v", err, models.InvalidErrCode)
-	}
-}
-func TestClient_ResponseErrorBody(t *testing.T) {
-	ret := models.ResponseClientError{
-		ReturnCode:  1,
-		ErrorString: "error happened",
-	}
-
-	readFunc := func(data []byte) ([]byte, error) {
-		req := models.Response{
-			ReturnCode: ret.ReturnCode,
-			Body: &models.ResponseError{
-				ErrorString: models.ConvertToProtoString(ret.ErrorString),
-			},
-		}
-		return req.Encode()
-	}
-	connection := &mocks.Conn{
-		MockWrite: mocks.MockWrite(false),
-		MockClose: mocks.MockClose(nil),
-		MockRead:  readFunc,
-	}
-	connection.MockDial = mocks.MockDial(connection, nil)
-	client := NewClient(connection)
-	err := client.Send("token", "scope")
-	if err != nil || res == nil {
-		t.Fatalf("error %v happened", err)
-	}
-
-	data, ok := res.(models.ResponseClientError)
-	if !ok {
-		t.Fatalf("invalid response data, expected ResponseClientOk")
-	}
-	if data.ReturnCode != ret.ReturnCode || ret.ErrorString != data.ErrorString {
-		t.Fatalf("invalid return code")
-	}
-}
-func TestClient_Response_CheckPackingData(t *testing.T) {
+func TestClient_SendAndResponse_Ok_Response(t *testing.T) {
 	token := "token"
 	scope := "scope"
+	res := models.TestResponseWithCodeOk(t)
+	clientType := res.Body.(*models.ResponseOk).ClientType
+	expiresIn := res.Body.(*models.ResponseOk).ExpiresIn
+	clientId, err := res.Body.(*models.ResponseOk).ClientId.ToString()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	userName, err := res.Body.(*models.ResponseOk).UserName.ToString()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	userId := res.Body.(*models.ResponseOk).UserId
+
+	expected := models.ResponseClientOk{
+		ReturnCode: res.ReturnCode,
+		ClientId:   clientId,
+		ClientType: clientType,
+		ExpiresIn:  expiresIn,
+		UserName:   userName,
+		UserId:     userId,
+	}
 
 	readFunc := func(data []byte) ([]byte, error) {
-		var res models.Request
-		err := res.Decode(data)
+		var req models.Request
+		err := req.Decode(data)
 		if err != nil {
 			return nil, err
 		}
 
-		tokenFromRead, err := res.Token.ToString()
+		tokenFromRead, err := req.Token.ToString()
 		if err != nil || tokenFromRead != token {
 			return nil, err
 		}
-		scopeFromRead, err := res.Scope.ToString()
+		scopeFromRead, err := req.Scope.ToString()
 		if err != nil || scopeFromRead != scope {
 			return nil, err
 		}
-		response := models.TestResponseWithCodeOk(t)
-		return response.Encode()
+		return res.Encode()
 	}
 	connection := &mocks.Conn{
 		MockClose: mocks.MockClose(nil),
@@ -242,8 +56,64 @@ func TestClient_Response_CheckPackingData(t *testing.T) {
 	}
 	connection.MockDial = mocks.MockDial(connection, nil)
 	client := NewClient(connection)
-	err := client.Send(token, scope)
-	if err != nil || res == nil {
+	var output string
+	buf := bytes.NewBufferString(output)
+	if err = client.Send(token, scope); err != nil {
 		t.Fatalf("error %v happened", err)
+	}
+	if err = client.GetResponse(buf); err != nil {
+		t.Fatalf("error %v happened", err)
+	}
+
+	expectedRes := fmt.Sprintf("client_id: %s\nclient_type: %d\nexpires_in: %d\nuser_id: %d\nusername: %s\n",
+		expected.ClientId, expected.ClientType, expected.ExpiresIn, expected.UserId, expected.UserName)
+	if buf.String() != expectedRes {
+		t.Fatalf("invalid test PrintResponsewith ok body \nexpected: %s\nreceive: %s", expectedRes, buf.String())
+	}
+}
+func TestClient_SendAndResponse_ErrorResponse(t *testing.T) {
+	token := "token"
+	scope := "scope"
+	res := models.TestResponseWithError(t)
+	expErrorString, err := res.Body.(*models.ResponseError).ErrorString.ToString()
+
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	readFunc := func(data []byte) ([]byte, error) {
+		var req models.Request
+		err = req.Decode(data)
+		if err != nil {
+			return nil, err
+		}
+
+		tokenFromRead, err := req.Token.ToString()
+		if err != nil || tokenFromRead != token {
+			return nil, err
+		}
+		scopeFromRead, err := req.Scope.ToString()
+		if err != nil || scopeFromRead != scope {
+			return nil, err
+		}
+		return res.Encode()
+	}
+	connection := &mocks.Conn{
+		MockClose: mocks.MockClose(nil),
+		MockRead:  readFunc,
+	}
+	connection.MockDial = mocks.MockDial(connection, nil)
+	client := NewClient(connection)
+	var output string
+	buf := bytes.NewBufferString(output)
+	if err = client.Send(token, scope); err != nil {
+		t.Fatalf("error %v happened", err)
+	}
+	if err = client.GetResponse(buf); err != nil {
+		t.Fatalf("error %v happened", err)
+	}
+
+	expectedRes := fmt.Sprintf("error: %s\nmessage: %s\n", errorCodes[res.ReturnCode], expErrorString)
+	if buf.String() != expectedRes {
+		t.Fatalf("invalid test GetResponse with error body\nexpected: %s\nreceive: %s", expectedRes, buf.String())
 	}
 }

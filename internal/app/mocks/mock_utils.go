@@ -1,7 +1,6 @@
 package mocks
 
 import (
-	"errors"
 	"mail-test-task/internal/app/connection"
 )
 
@@ -19,7 +18,7 @@ func MockClose(err error) CloseFunc {
 func MockWrite(isErr bool) WriteFunc {
 	return func([]byte) (int, error) {
 		if isErr {
-			return -1, errors.New("error happened")
+			return -1, connection.WriteError
 		}
 		return -1, nil
 	}
