@@ -11,8 +11,10 @@ func TestClient_Send_InvalidWrite(t *testing.T) {
 		MockWrite: mocks.MockWrite(true),
 		MockClose: mocks.MockClose(nil),
 	}
+
 	dial := mocks.MockDial(connection, nil)
 	connection.MockDial = dial
+
 	client := NewClient(connection)
 
 	if err := client.Send("vk", "mail.ru"); err != conn.WriteError {
@@ -27,6 +29,7 @@ func TestClient_Send_InvalidDial(t *testing.T) {
 
 	dial := mocks.MockDial(connection, conn.DialError)
 	connection.MockDial = dial
+
 	client := NewClient(connection)
 
 	if err := client.Send("vk", "mail.ru"); err != conn.DialError {
@@ -42,6 +45,7 @@ func TestClient_Send_InvalidClose(t *testing.T) {
 
 	dial := mocks.MockDial(connection, nil)
 	connection.MockDial = dial
+
 	client := NewClient(connection)
 
 	defer func() {
@@ -61,6 +65,7 @@ func TestClient_Send_Success(t *testing.T) {
 
 	dial := mocks.MockDial(connection, nil)
 	connection.MockDial = dial
+
 	client := NewClient(connection)
 
 	if err := client.Send("vk", "mail.ru"); err != nil {

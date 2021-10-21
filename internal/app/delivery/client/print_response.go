@@ -20,7 +20,7 @@ func printErr(writer io.Writer, resp models.ResponseClientError) error {
 	if resp.ReturnCode < 0 || int(resp.ReturnCode) > len(errorCodes) {
 		errorString = "unknown error"
 	} else {
-		errorString = errorCodes[resp.ReturnCode]
+		errorString = errorCodes[int(resp.ReturnCode)].Error()
 	}
 	if _, err := fmt.Fprintf(writer, "error: %s\nmessage: %s\n", errorString, resp.ErrorString); err != nil {
 		return err

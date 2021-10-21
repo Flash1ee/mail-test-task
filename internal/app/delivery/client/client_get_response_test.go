@@ -21,6 +21,7 @@ func TestClient_GetResponse_InvalidRead(t *testing.T) {
 
 	dial := mocks.MockDial(connection, nil)
 	connection.MockDial = dial
+
 	client := NewClient(connection)
 	var output string
 	buf := bytes.NewBufferString(output)
@@ -31,6 +32,7 @@ func TestClient_GetResponse_InvalidRead(t *testing.T) {
 
 func TestClient_GetResponse_Ok(t *testing.T) {
 	res := models.TestResponseWithCodeOk(t)
+
 	clientType := res.Body.(*models.ResponseOk).ClientType
 	expiresIn := res.Body.(*models.ResponseOk).ExpiresIn
 	clientId, err := res.Body.(*models.ResponseOk).ClientId.ToString()
@@ -41,6 +43,7 @@ func TestClient_GetResponse_Ok(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+
 	userId := res.Body.(*models.ResponseOk).UserId
 
 	expected := models.ResponseClientOk{
@@ -57,7 +60,9 @@ func TestClient_GetResponse_Ok(t *testing.T) {
 	connection := &mocks.Conn{
 		MockRead: readFunc,
 	}
+
 	client := NewClient(connection)
+
 	var output string
 	buf := bytes.NewBufferString(output)
 	if err = client.GetResponse(buf); err != nil {
@@ -72,6 +77,7 @@ func TestClient_GetResponse_Ok(t *testing.T) {
 }
 func TestClient_GetResponse_Error(t *testing.T) {
 	res := models.TestResponseWithError(t)
+
 	expErrorString, err := res.Body.(*models.ResponseError).ErrorString.ToString()
 	if err != nil {
 		t.Fatal(err.Error())
@@ -84,19 +90,21 @@ func TestClient_GetResponse_Error(t *testing.T) {
 		MockRead: readFunc,
 	}
 	client := NewClient(connection)
+
 	var output string
 	buf := bytes.NewBufferString(output)
 	if err := client.GetResponse(buf); err != nil {
 		t.Fatal("error testing on GetResponse with error body")
 	}
 
-	expectedRes := fmt.Sprintf("error: %s\nmessage: %s\n", errorCodes[res.ReturnCode], expErrorString)
+	expectedRes := fmt.Sprintf("error: %s\nmessage: %s\n", errorCodes[int(res.ReturnCode)], expErrorString)
 	if buf.String() != expectedRes {
 		t.Fatalf("invalid test GetResponse with error body\nexpected: %s\nreceive: %s", expectedRes, buf.String())
 	}
 }
 func TestClient_GetResponse_ErrorWithUnknownError(t *testing.T) {
 	res := models.TestResponseWithError(t)
+
 	res.ReturnCode = 123
 	expErrorString, err := res.Body.(*models.ResponseError).ErrorString.ToString()
 	if err != nil {
@@ -110,6 +118,7 @@ func TestClient_GetResponse_ErrorWithUnknownError(t *testing.T) {
 		MockRead: readFunc,
 	}
 	client := NewClient(connection)
+
 	var output string
 	buf := bytes.NewBufferString(output)
 	if err := client.GetResponse(buf); err != nil {
@@ -133,6 +142,7 @@ func TestClient_GetResponse_Error_IncorrectServerRespond(t *testing.T) {
 		MockRead: readFunc,
 	}
 	client := NewClient(connection)
+
 	var output string
 	buf := bytes.NewBufferString(output)
 	if err := client.GetResponse(buf); err != models.InvalidDecode {

@@ -45,5 +45,6 @@ func (c *TcpConnection) Dial() (Connection, error) {
 	if err != nil {
 		return nil, DialError
 	}
+
 	return &TcpConnection{conn: conn}, nil
 }

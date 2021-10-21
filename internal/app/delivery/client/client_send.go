@@ -29,6 +29,7 @@ func (c *Client) sendPackage(token string, scope string) error {
 	if err != nil {
 		return err
 	}
+
 	if _, err = c.conn.Write(data); err != nil {
 		return err
 	}

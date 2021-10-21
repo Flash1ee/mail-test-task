@@ -12,16 +12,19 @@ func TestClient_SendAndResponse_Ok_Response(t *testing.T) {
 	token := "token"
 	scope := "scope"
 	res := models.TestResponseWithCodeOk(t)
+
 	clientType := res.Body.(*models.ResponseOk).ClientType
 	expiresIn := res.Body.(*models.ResponseOk).ExpiresIn
 	clientId, err := res.Body.(*models.ResponseOk).ClientId.ToString()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+
 	userName, err := res.Body.(*models.ResponseOk).UserName.ToString()
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+
 	userId := res.Body.(*models.ResponseOk).UserId
 
 	expected := models.ResponseClientOk{
@@ -35,7 +38,7 @@ func TestClient_SendAndResponse_Ok_Response(t *testing.T) {
 
 	readFunc := func(data []byte) ([]byte, error) {
 		var req models.Request
-		err := req.Decode(data)
+		err = req.Decode(data)
 		if err != nil {
 			return nil, err
 		}
@@ -44,10 +47,12 @@ func TestClient_SendAndResponse_Ok_Response(t *testing.T) {
 		if err != nil || tokenFromRead != token {
 			return nil, err
 		}
+
 		scopeFromRead, err := req.Scope.ToString()
 		if err != nil || scopeFromRead != scope {
 			return nil, err
 		}
+
 		return res.Encode()
 	}
 	connection := &mocks.Conn{
@@ -56,6 +61,7 @@ func TestClient_SendAndResponse_Ok_Response(t *testing.T) {
 	}
 	connection.MockDial = mocks.MockDial(connection, nil)
 	client := NewClient(connection)
+
 	var output string
 	buf := bytes.NewBufferString(output)
 	if err = client.Send(token, scope); err != nil {
@@ -75,6 +81,7 @@ func TestClient_SendAndResponse_ErrorResponse(t *testing.T) {
 	token := "token"
 	scope := "scope"
 	res := models.TestResponseWithError(t)
+
 	expErrorString, err := res.Body.(*models.ResponseError).ErrorString.ToString()
 
 	if err != nil {
@@ -91,10 +98,12 @@ func TestClient_SendAndResponse_ErrorResponse(t *testing.T) {
 		if err != nil || tokenFromRead != token {
 			return nil, err
 		}
+
 		scopeFromRead, err := req.Scope.ToString()
 		if err != nil || scopeFromRead != scope {
 			return nil, err
 		}
+
 		return res.Encode()
 	}
 	connection := &mocks.Conn{
@@ -103,6 +112,7 @@ func TestClient_SendAndResponse_ErrorResponse(t *testing.T) {
 	}
 	connection.MockDial = mocks.MockDial(connection, nil)
 	client := NewClient(connection)
+
 	var output string
 	buf := bytes.NewBufferString(output)
 	if err = client.Send(token, scope); err != nil {
@@ -112,7 +122,7 @@ func TestClient_SendAndResponse_ErrorResponse(t *testing.T) {
 		t.Fatalf("error %v happened", err)
 	}
 
-	expectedRes := fmt.Sprintf("error: %s\nmessage: %s\n", errorCodes[res.ReturnCode], expErrorString)
+	expectedRes := fmt.Sprintf("error: %s\nmessage: %s\n", errorCodes[int(res.ReturnCode)], expErrorString)
 	if buf.String() != expectedRes {
 		t.Fatalf("invalid test GetResponse with error body\nexpected: %s\nreceive: %s", expectedRes, buf.String())
 	}
