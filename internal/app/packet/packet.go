@@ -1,4 +1,4 @@
-package client
+package packet
 
 import "mail-test-task/internal/app/models"
 
@@ -19,7 +19,7 @@ func packingHeader(body []byte) ([]byte, error) {
 	encoded, err := header.Encode()
 
 	if err != nil {
-		return nil, err
+		return nil, InvalidPackingHeader
 	}
 	return encoded, nil
 }
@@ -31,15 +31,16 @@ func packingBody(token, scope string) ([]byte, error) {
 	body := models.Request{
 		SvcMsg: svc_msg,
 		Token:  protoToken,
-		Scope:  protoScope}
+		Scope:  protoScope,
+	}
 	encoded, err := body.Encode()
 	if err != nil {
-		return nil, err
+		return nil, InvalidPackingBody
 	}
 	return encoded, nil
 }
 
-func getPackage(token string, scope string) ([]byte, error) {
+func GetPacket(token string, scope string) ([]byte, error) {
 	body, err := packingBody(token, scope)
 	if err != nil {
 		return nil, err

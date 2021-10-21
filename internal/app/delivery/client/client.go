@@ -5,59 +5,71 @@ import (
 	"io"
 	"mail-test-task/internal/app/connection"
 	"mail-test-task/internal/app/models"
+	"mail-test-task/internal/app/packet"
 )
 
 type Client struct {
-	conn connection.Conn
+	conn connection.Connection
 }
 
-func NewClient(conn connection.Conn) *Client {
+func NewClient(conn connection.Connection) IClient {
 	return &Client{
 		conn: conn,
 	}
 }
-func (c *Client) Send(token string, scope string) (interface{}, error) {
+func (c *Client) Send(token string, scope string) error {
 	conn, err := c.conn.Dial()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	defer func(conn connection.Conn) {
-		err := conn.Close()
+	defer func(conn connection.Connection) {
+		err = conn.Close()
 		if err != nil {
 			panic(err)
 		}
 	}(conn)
 
-	if err := sendPackage(conn, token, scope); err != nil {
-		return nil, err
-	}
-
-	respond, err := getRespond(conn)
-	if err != nil {
-		return nil, err
-	}
-
-	return respond, nil
-}
-
-func sendPackage(conn connection.Conn, token string, scope string) error {
-	data, err := getPackage(token, scope)
-	if err != nil {
-		return err
-	}
-	if _, err := conn.Write(data); err != nil {
+	if err = c.sendPackage(token, scope); err != nil {
 		return err
 	}
 	return nil
 }
-func getRespond(conn connection.Conn) (interface{}, error) {
-	data, err := conn.Read()
+
+func (c *Client) sendPackage(token string, scope string) error {
+	data, err := packet.GetPacket(token, scope)
+	if err != nil {
+		return err
+	}
+	if _, err = c.conn.Write(data); err != nil {
+		return err
+	}
+	return nil
+}
+func (c *Client) GetResponse(writer io.Writer) error {
+	response, err := c.getResponse()
+	if err != nil {
+		return err
+	}
+	switch v := response.(type) {
+	case models.ResponseClientOk:
+		return printOk(writer, v)
+	case models.ResponseClientError:
+		return printErr(writer, v)
+	default:
+		if _, err = fmt.Fprintf(writer, "response error"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func (c *Client) getResponse() (interface{}, error) {
+	data, err := c.conn.Read()
 	if err != nil {
 		return nil, err
 	}
 	var res models.Response
-	if err := res.Decode(data); err != nil {
+	if err = res.Decode(data); err != nil {
 		return nil, err
 	}
 
@@ -66,17 +78,4 @@ func getRespond(conn connection.Conn) (interface{}, error) {
 		return nil, err
 	}
 	return resp, err
-}
-func (c *Client) PrintResponse(writer io.Writer, resp interface{}) error {
-	switch v := resp.(type) {
-	case models.ResponseClientOk:
-		return printOk(writer, v)
-	case models.ResponseClientError:
-		return printErr(writer, v)
-	default:
-		if _, err := fmt.Fprintf(writer, "response error"); err != nil {
-			return err
-		}
-	}
-	return nil
 }

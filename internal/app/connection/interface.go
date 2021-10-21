@@ -1,7 +1,7 @@
 package connection
 
-type Conn interface {
-	Dial() (Conn, error)
+type Connection interface {
+	Dial() (Connection, error)
 	Read() ([]byte, error)
 	Write(data []byte) (int, error)
 	Close() error

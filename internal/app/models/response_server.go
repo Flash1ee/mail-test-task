@@ -32,24 +32,24 @@ func (r *ResponseOk) Encode() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if _, err := data.Write(binClientId); err != nil {
-		return nil, err
+	if _, err = data.Write(binClientId); err != nil {
+		return nil, InvalidEncode
 	}
-	if err := binary.Write(data, binary.LittleEndian, r.ClientType); err != nil {
-		return nil, err
+	if err = binary.Write(data, binary.LittleEndian, r.ClientType); err != nil {
+		return nil, InvalidEncode
 	}
 	binUserName, err := r.UserName.Encode()
 	if err != nil {
 		return nil, err
 	}
-	if _, err := data.Write(binUserName); err != nil {
-		return nil, err
+	if _, err = data.Write(binUserName); err != nil {
+		return nil, InvalidEncode
 	}
-	if err := binary.Write(data, binary.LittleEndian, r.ExpiresIn); err != nil {
-		return nil, err
+	if err = binary.Write(data, binary.LittleEndian, r.ExpiresIn); err != nil {
+		return nil, InvalidEncode
 	}
-	if err := binary.Write(data, binary.LittleEndian, r.UserId); err != nil {
-		return nil, err
+	if err = binary.Write(data, binary.LittleEndian, r.UserId); err != nil {
+		return nil, InvalidEncode
 	}
 
 	return data.Bytes(), nil
@@ -61,17 +61,17 @@ func (r *ResponseOk) Decode(binData []byte) error {
 	}
 	data.Next(r.ClientId.GetBytesLength())
 	if err := binary.Read(data, binary.LittleEndian, &r.ClientType); err != nil {
-		return err
+		return InvalidDecode
 	}
 	if err := r.UserName.Decode(data.Bytes()); err != nil {
 		return err
 	}
 	data.Next(r.UserName.GetBytesLength())
 	if err := binary.Read(data, binary.LittleEndian, &r.ExpiresIn); err != nil {
-		return err
+		return InvalidDecode
 	}
 	if err := binary.Read(data, binary.LittleEndian, &r.UserId); err != nil {
-		return err
+		return InvalidDecode
 	}
 	return nil
 }
@@ -93,7 +93,7 @@ func (r *ResponseError) Decode(binData []byte) error {
 func (r *Response) Encode() ([]byte, error) {
 	dataBin := new(bytes.Buffer)
 	if err := binary.Write(dataBin, binary.LittleEndian, r.ReturnCode); err != nil {
-		return nil, err
+		return nil, InvalidEncode
 	}
 	if r.Body == nil {
 		return nil, EmptyBodyErr
@@ -108,7 +108,7 @@ func (r *Response) Decode(binData []byte) error {
 	data := bytes.NewBuffer(binData)
 
 	if err := binary.Read(data, binary.LittleEndian, &r.ReturnCode); err != nil {
-		return err
+		return InvalidDecode
 	}
 	if r.ReturnCode != 0 {
 		r.Body = &ResponseError{}

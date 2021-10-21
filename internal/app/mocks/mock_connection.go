@@ -10,7 +10,7 @@ type Conn struct {
 	data      []byte
 }
 
-func (c *Conn) Dial() (connection.Conn, error) {
+func (c *Conn) Dial() (connection.Connection, error) {
 	return c.MockDial()
 }
 

@@ -19,8 +19,8 @@ func (r *Request) Encode() ([]byte, error) {
 	}
 
 	svcBin := new(bytes.Buffer)
-	if err := binary.Write(svcBin, binary.LittleEndian, r.SvcMsg); err != nil {
-		return nil, err
+	if err = binary.Write(svcBin, binary.LittleEndian, r.SvcMsg); err != nil {
+		return nil, InvalidEncode
 	}
 
 	tokenBin, err := r.Token.Encode()
@@ -42,7 +42,7 @@ func (r *Request) Decode(binData []byte) error {
 	}
 	data.Next(r.Header.HeaderSize())
 	if err := binary.Read(data, binary.LittleEndian, &r.SvcMsg); err != nil {
-		return err
+		return InvalidDecode
 	}
 	if err := r.Token.Decode(data.Bytes()); err != nil {
 		return err

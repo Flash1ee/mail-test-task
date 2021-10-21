@@ -21,7 +21,7 @@ func TestClient_InvalidWrite(t *testing.T) {
 	connection.MockDial = dial
 	client := NewClient(connection)
 
-	if _, err := client.Send("vk", "mail.ru"); err == nil {
+	if err := client.Send("vk", "mail.ru"); err == nil {
 		t.Fatalf("error %v happened", err)
 	}
 }
@@ -35,7 +35,7 @@ func TestClient_InvalidDial(t *testing.T) {
 	connection.MockDial = dial
 	client := NewClient(connection)
 
-	if _, err := client.Send("vk", "mail.ru"); err == nil {
+	if err := client.Send("vk", "mail.ru"); err == nil {
 		t.Fatalf("error %v happened", err)
 	}
 }
@@ -53,7 +53,7 @@ func TestClient_InvalidRead(t *testing.T) {
 	connection.MockDial = dial
 	client := NewClient(connection)
 
-	if _, err := client.Send("vk", "mail.ru"); err == nil {
+	if err := client.Send("vk", "mail.ru"); err == nil {
 		t.Fatalf("error %v happened", err)
 	}
 }
@@ -78,7 +78,7 @@ func TestClient_InvalidClose(t *testing.T) {
 			t.Errorf("The code did not panic")
 		}
 	}()
-	if _, err := client.Send("vk", "mail.ru"); err == nil {
+	if err := client.Send("vk", "mail.ru"); err == nil {
 		t.Fatalf("error %v happened", err)
 	}
 }
@@ -112,7 +112,7 @@ func TestClient_ResponseOk(t *testing.T) {
 	}
 	connection.MockDial = mocks.MockDial(connection, nil)
 	client := NewClient(connection)
-	res, err := client.Send("token", "scope")
+	err := client.Send("token", "scope")
 	if err != nil {
 		t.Fatalf("error %v happened", err)
 	}
@@ -143,7 +143,7 @@ func TestClient_Response_ReturnCode_Error(t *testing.T) {
 	}
 	connection.MockDial = mocks.MockDial(connection, nil)
 	client := NewClient(connection)
-	res, err := client.Send("token", "scope")
+	err := client.Send("token", "scope")
 	if err == nil || res != nil {
 		t.Fatalf("error %v happened", err)
 	}
@@ -171,7 +171,7 @@ func TestClient_Response_EmptyBody(t *testing.T) {
 	}
 	connection.MockDial = mocks.MockDial(connection, nil)
 	client := NewClient(connection)
-	res, err := client.Send("token", "scope")
+	err := client.Send("token", "scope")
 	if err == nil || res != nil {
 		t.Fatalf("error %v happened", err)
 	}
@@ -201,7 +201,7 @@ func TestClient_ResponseErrorBody(t *testing.T) {
 	}
 	connection.MockDial = mocks.MockDial(connection, nil)
 	client := NewClient(connection)
-	res, err := client.Send("token", "scope")
+	err := client.Send("token", "scope")
 	if err != nil || res == nil {
 		t.Fatalf("error %v happened", err)
 	}
@@ -242,7 +242,7 @@ func TestClient_Response_CheckPackingData(t *testing.T) {
 	}
 	connection.MockDial = mocks.MockDial(connection, nil)
 	client := NewClient(connection)
-	res, err := client.Send(token, scope)
+	err := client.Send(token, scope)
 	if err != nil || res == nil {
 		t.Fatalf("error %v happened", err)
 	}

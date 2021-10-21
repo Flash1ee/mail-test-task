@@ -5,7 +5,7 @@ import (
 	"mail-test-task/internal/app/connection"
 )
 
-type Dial func() (connection.Conn, error)
+type Dial func() (connection.Connection, error)
 type CloseFunc func() error
 type ReadFunc func([]byte) ([]byte, error)
 type WriteFunc func([]byte) (int, error)
@@ -25,8 +25,8 @@ func MockWrite(isErr bool) WriteFunc {
 	}
 }
 
-func MockDial(conn connection.Conn, err error) Dial {
-	return func() (connection.Conn, error) {
+func MockDial(conn connection.Connection, err error) Dial {
+	return func() (connection.Connection, error) {
 		return conn, err
 	}
 }
