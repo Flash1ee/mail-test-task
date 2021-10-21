@@ -16,6 +16,7 @@ func NewTcpConnection(host string, port string) (Connection, error) {
 	if err != nil {
 		return nil, BadResolve
 	}
+
 	return &TcpConnection{tcpAddr: tcpAddr}, nil
 }
 
@@ -24,12 +25,14 @@ func (c *TcpConnection) Read() ([]byte, error) {
 	if err != nil {
 		return nil, ReadError
 	}
+
 	return res, nil
 }
 func (c *TcpConnection) Close() error {
 	if err := c.conn.Close(); err != nil {
 		return CloseError
 	}
+
 	return nil
 }
 
@@ -38,6 +41,7 @@ func (c *TcpConnection) Write(data []byte) (int, error) {
 	if err != nil {
 		return -1, WriteError
 	}
+
 	return res, err
 }
 func (c *TcpConnection) Dial() (Connection, error) {

@@ -6,11 +6,13 @@ func cmpProtoString(str String, str2 String) bool {
 	if str.Len != str2.Len || len(str.Str) != len(str.Str) {
 		return false
 	}
+
 	for i := range str.Str {
 		if str.Str[i] != str2.Str[i] {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -40,10 +42,12 @@ func TestString_Encode_Decode(t *testing.T) {
 	if err != nil {
 		t.Fatal("invalid encoded protoStr")
 	}
+
 	var decodedProtoStr String
 	if err := decodedProtoStr.Decode(encoded); err != nil {
 		t.Fatal("invalid decoded protoStr")
 	}
+
 	if !cmpProtoString(expectedProtoStr, decodedProtoStr) {
 		t.Fatalf("invalid compare: %v not equal %v", expectedProtoStr, decodedProtoStr)
 	}
@@ -56,16 +60,19 @@ func TestString_Encode_Decode_Empty(t *testing.T) {
 	if err != nil {
 		t.Fatal("invalid encoded protoStr")
 	}
+
 	var decodedProtoStr String
-	if err := decodedProtoStr.Decode(encoded); err != nil {
+	if err = decodedProtoStr.Decode(encoded); err != nil {
 		t.Fatal("invalid decoded protoStr")
 	}
+
 	if !cmpProtoString(expectedProtoStr, decodedProtoStr) {
 		t.Fatalf("invalid compare: %v not equal %v", expectedProtoStr, decodedProtoStr)
 	}
 }
 func TestString_ToString(t *testing.T) {
 	testString := "mailisvk"
+
 	protoString := ConvertToProtoString(testString)
 	res, err := protoString.ToString()
 	if err != nil || res != testString {
@@ -75,6 +82,7 @@ func TestString_ToString(t *testing.T) {
 }
 func TestString_ToString_Empty(t *testing.T) {
 	testString := ""
+
 	protoString := ConvertToProtoString(testString)
 	res, err := protoString.ToString()
 	if err != nil || res != testString {

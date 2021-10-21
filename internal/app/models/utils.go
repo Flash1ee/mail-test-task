@@ -23,6 +23,7 @@ func ConvertToProtoString(str string) String {
 	for _, val := range str {
 		b = append(b, int8(val))
 	}
+
 	return String{
 		Str: b,
 		Len: int32(length),

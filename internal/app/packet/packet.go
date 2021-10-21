@@ -37,6 +37,7 @@ func packingBody(token, scope string) ([]byte, error) {
 	if err != nil {
 		return nil, InvalidPackingBody
 	}
+
 	return encoded, nil
 }
 
@@ -45,10 +46,13 @@ func GetPacket(token string, scope string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	header, err := packingHeader(body)
 	if err != nil {
 		return nil, err
 	}
+
 	headerLen := models.Header{}.HeaderSize()
+
 	return models.SliceSum(header, body[headerLen:]), nil
 }

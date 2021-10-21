@@ -18,15 +18,18 @@ func (s *String) Encode() ([]byte, error) {
 	if err := binary.Write(data, binary.LittleEndian, s.Len); err != nil {
 		return nil, InvalidEncode
 	}
+
 	for i := int32(0); i < s.Len; i++ {
 		if err := data.WriteByte(byte(s.Str[i])); err != nil {
 			return nil, InvalidEncode
 		}
 	}
+
 	return data.Bytes(), nil
 }
 func (s *String) Decode(binData []byte) error {
 	data := bytes.NewBuffer(binData)
+
 	if err := binary.Read(data, binary.LittleEndian, &s.Len); err != nil {
 		return InvalidDecode
 	}
@@ -42,11 +45,13 @@ func (s *String) Decode(binData []byte) error {
 }
 func (s String) ToString() (string, error) {
 	decodeString := new(strings.Builder)
+
 	for _, char := range s.Str {
 		if err := decodeString.WriteByte(byte(char)); err != nil {
 			return "", InvalidDecode
 		}
 	}
+
 	return decodeString.String(), nil
 }
 func (s String) GetBytesLength() int {

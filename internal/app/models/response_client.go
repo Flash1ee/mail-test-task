@@ -19,9 +19,11 @@ func ConvertToClientResponse(body Response) (interface{}, error) {
 	if body.ReturnCode < 0 {
 		return nil, InvalidErrCode
 	}
+
 	if body.Body == nil {
 		return nil, EmptyBodyErr
 	}
+
 	if body.ReturnCode != 0 {
 		ret := ResponseClientError{ReturnCode: body.ReturnCode}
 		if ret.ErrorString, err = body.Body.(*ResponseError).ErrorString.ToString(); err != nil {
@@ -29,10 +31,12 @@ func ConvertToClientResponse(body Response) (interface{}, error) {
 		}
 		return ret, nil
 	}
+
 	stringClientId, err := body.Body.(*ResponseOk).ClientId.ToString()
 	if err != nil {
 		return nil, err
 	}
+
 	stringUserName, err := body.Body.(*ResponseOk).UserName.ToString()
 	if err != nil {
 		return nil, err

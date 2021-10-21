@@ -40,17 +40,22 @@ func (r *Request) Decode(binData []byte) error {
 	if err := r.Header.Decode(data.Bytes()); err != nil {
 		return err
 	}
+
 	data.Next(r.Header.HeaderSize())
+
 	if err := binary.Read(data, binary.LittleEndian, &r.SvcMsg); err != nil {
 		return InvalidDecode
 	}
+
 	if err := r.Token.Decode(data.Bytes()); err != nil {
 		return err
 	}
+
 	data.Next(r.Token.GetBytesLength())
 
 	if err := r.Scope.Decode(data.Bytes()); err != nil {
 		return err
 	}
+
 	return nil
 }

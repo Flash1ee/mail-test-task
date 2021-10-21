@@ -20,6 +20,7 @@ func MockWrite(isErr bool) WriteFunc {
 		if isErr {
 			return -1, connection.WriteError
 		}
+
 		return -1, nil
 	}
 }
