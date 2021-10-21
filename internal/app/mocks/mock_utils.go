@@ -9,6 +9,11 @@ type CloseFunc func() error
 type ReadFunc func([]byte) ([]byte, error)
 type WriteFunc func([]byte) (int, error)
 
+const (
+	MOCK_WRITE_N_OK  = 0
+	MOCK_WRITE_N_ERR = -1
+)
+
 func MockClose(err error) CloseFunc {
 	return func() error {
 		return err
@@ -18,10 +23,10 @@ func MockClose(err error) CloseFunc {
 func MockWrite(isErr bool) WriteFunc {
 	return func([]byte) (int, error) {
 		if isErr {
-			return -1, connection.WriteError
+			return MOCK_WRITE_N_ERR, connection.WriteError
 		}
 
-		return -1, nil
+		return MOCK_WRITE_N_OK, nil
 	}
 }
 

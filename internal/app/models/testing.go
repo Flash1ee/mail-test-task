@@ -68,37 +68,3 @@ func TestResponseWithError(t *testing.T) Response {
 		Body:       &responseError,
 	}
 }
-func TestResponseClientOk(t *testing.T) ResponseClientOk {
-	t.Helper()
-	resp := TestResponseWithCodeOk(t)
-	body := resp.Body.(*ResponseOk)
-	id, err := body.ClientId.ToString()
-	if err != nil {
-		t.Fatal("error parse responseOk")
-	}
-	username, err := body.UserName.ToString()
-	if err != nil {
-		t.Fatal("error parse responseOk")
-	}
-	return ResponseClientOk{
-		ReturnCode: resp.ReturnCode,
-		ClientId:   id,
-		ClientType: body.ClientType,
-		UserName:   username,
-		ExpiresIn:  body.ExpiresIn,
-		UserId:     body.UserId,
-	}
-}
-func TestResponseClientError(t *testing.T) ResponseClientError {
-	t.Helper()
-	resp := TestResponseWithError(t)
-	body := resp.Body.(*ResponseError)
-	errorString, err := body.ErrorString.ToString()
-	if err != nil {
-		t.Fatal("error parse responseOk")
-	}
-	return ResponseClientError{
-		ReturnCode:  resp.ReturnCode,
-		ErrorString: errorString,
-	}
-}
